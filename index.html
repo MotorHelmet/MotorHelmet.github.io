@@ -5,13 +5,14 @@
         <meta charset="utf-8">
         <title> Motor Helmet</title>
         <script src="https://chirimen.org/remote-connection/js/RelayServer.js"></script>
+        <script src="js/datas.js"></script>
         <script src="js/relayAccel.js"></script>
         <script src="js/relaySht30.js"></script>
         <script src="js/relayMousture.js"></script>
     </head>
     
     <body>
-        <button onclick="setRelay()"> setRelay </button>
+        <button onclick="setRelaySht30(); setRelayAccel()"> setRelay </button>
         <table border="1">
             <tr>
                 <th>  </th>
@@ -23,7 +24,7 @@
             <tr>
                 <th> value </th>
                 <td id="valueAccel"> 0 </td>
-                <td id="valueAccel"> 0 </td>
+                <td id="valueSht30"> 0 </td>
                 <td id="valueMoisture"> 0 </td>
             </tr>
             <tr>
