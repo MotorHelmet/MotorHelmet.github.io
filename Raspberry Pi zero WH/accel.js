@@ -26,6 +26,6 @@ async function main() {
         } catch (err) {
             console.error("READ ERROR:" + err);
         }
-        await sleep(1000);
+        await sleep(500);
     }
 }
