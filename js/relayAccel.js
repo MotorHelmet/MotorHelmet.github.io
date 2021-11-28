@@ -1,5 +1,6 @@
 // チャンネル
 const accelMotor__From__RasPI = "accelMotor__From__RasPI";
+const motor__From__PC = "motor__From__PC";
 
 // 記録用のインスタンス
 let accelDatas = new Datas("Accel");
@@ -7,21 +8,26 @@ let accelDatas = new Datas("Accel");
 // 怖いがっている
 accelDatas.LIMIT = 15;
 
-// // 記録用の配列
-// let sht30Data = new Array();
-// let date = new Array();
-// let isScarryData = new Array();
+// 怖がっているか
+// let isScary = false;
 
+let channelAccel;
+let relayToMotorAccel;
 async function setRelayAccel()
 {
-    let relay = RelayServer("achex", "chirimenSocket");
-    accelDatas.channel = await relay.subscribe(accelMotor__From__RasPI);
+    let relayAccel = RelayServer("achex", "chirimenSocket");
+    accelDatas.channel = await relayAccel.subscribe(accelMotor__From__RasPI);
     console.log("RelayServerに接続完了");
     accelDatas.channel.onmessage = getMessageAccel;
+
+    relayToMotorAccel = RelayServer("achex", "chirimenSocket");
+    channelAccel = await relayToMotorAccel.subscribe(motor__From__PC);
 }
 
 async function getMessageAccel(msg)
 {
+    console.log("getMessageAccel");
+
     // データ取得
     let data = msg.data;
     let value = document.getElementById(`value${accelDatas.sensor}`);
@@ -31,9 +37,9 @@ async function getMessageAccel(msg)
     let arrayAccel = document.getElementById(`array${accelDatas.sensor}`);
     accelDatas.sensorData.push(data.all);                                  // 配列に値を追加
 
-    let isScary = (data.all > accelDatas.LIMIT) ? true : false;
-    scary.innerHTML = (isScary === true) ? "O" : "X";           // 「怖いか」 出力
-    accelDatas.isScarryData.push(isScary);
+    accelDatas.isScary = (data.all > accelDatas.LIMIT) ? true : false;
+    scary.innerHTML = (accelDatas.isScary === true) ? "O" : "X";           // 「怖いか」 出力
+    accelDatas.isScarryData.push(accelDatas.isScary);
     
     let max = accelDatas.sensorData.reduce(function(a, b)// 最大値取得
     {
@@ -52,9 +58,19 @@ async function getMessageAccel(msg)
     let th = document.createElement("th");
     th.innerHTML = `${now.getFullYear()}/${now.getMonth()}/${now.getDay()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
     tdData.innerHTML = data.all;
-    tdIsScaryData.innerHTML = (isScary === true) ? "O" : "X";
+    tdIsScaryData.innerHTML = (accelDatas.isScary === true) ? "O" : "X";
     tr.appendChild(th);
     tr.appendChild(tdData);
     tr.appendChild(tdIsScaryData);
     arrayAccel.appendChild(tr);
+
+    await sendDataToMotorAccel();
+}
+
+
+async function sendDataToMotorAccel()
+{
+    channelAccel.send(accelDatas.isScary);
+    // channel.send({data: false});
+    console.log(`モータに ${accelDatas.isScary} を送信しました`);
 }

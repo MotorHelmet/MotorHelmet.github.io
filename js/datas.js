@@ -9,5 +9,9 @@ class Datas
         this.maxData = new Array();
         this.date = new Array();
         this.LIMIT = limit;
+
+        this.channelToMotor = 0;
+
+        this.isScary = false;
     }
 }

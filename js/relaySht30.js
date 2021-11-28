@@ -5,18 +5,22 @@ const sht30__From__RasPI = "sht30__From__RasPI";
 let sht30Datas = new Datas("Sht30");
 
 // 怖いがっている
-sht30Datas.LIMIT = 25;
+sht30Datas.LIMIT = 30;
+
+// let isScary;
 
 async function setRelaySht30()
 {
     console.log("test");
     let relay = RelayServer("achex", "chirimenSocket");
     sht30Datas.channel = await relay.subscribe(sht30__From__RasPI);
-    console.log("RelayServerに接続完了");
+    console.log("RelayServerに接続完了_sht30");
     sht30Datas.channel.onmessage = getMessageSht30;
+
+    channelSht30 = await relayToMotorSht30.subscribe(motor__From__PC);
 }
 
-function getMessageSht30(msg)
+async function getMessageSht30(msg)
 {
     // データ取得
     let data = msg.data;
@@ -27,9 +31,9 @@ function getMessageSht30(msg)
     let arraySht30 = document.getElementById("arraySht30");
     sht30Datas.sensorData.push(data);                                  // 配列に値を追加
 
-    let isScary = (data > sht30Datas.LIMIT) ? true : false;
-    scary.innerHTML = (isScary === true) ? "O" : "X";           // 「怖いか」 出力
-    sht30Datas.isScarryData.push(isScary);
+    sht30Datas.isScary = (data > sht30Datas.LIMIT) ? true : false;
+    scary.innerHTML = (sht30Datas.isScary === true) ? "O" : "X";           // 「怖いか」 出力
+    sht30Datas.isScarryData.push(sht30Datas.isScary);
     
     // let max = Math.max.apply(null, accelData);                       // 最大値取得
     let max = sht30Datas.sensorData.reduce(function(a, b)
@@ -49,9 +53,20 @@ function getMessageSht30(msg)
     let th = document.createElement("th");
     th.innerHTML = `${now.getFullYear()}/${now.getMonth()}/${now.getDay()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
     tdData.innerHTML = data;
-    tdIsScaryData.innerHTML = (isScary === true) ? "O" : "X";
+    tdIsScaryData.innerHTML = (sht30Datas.isScary === true) ? "O" : "X";
     tr.appendChild(th);
     tr.appendChild(tdData);
     tr.appendChild(tdIsScaryData);
     arraySht30.appendChild(tr);
+
+    await sendDataToMotorFromSht30();
+}
+
+let channelSht30;
+let relayToMotorSht30 = RelayServer("achex", "chirimenSocket");
+async function sendDataToMotorFromSht30()
+{
+    channelSht30.send(sht30Datas.isScary);
+    // channel.send({data: false});
+    console.log(`モータに ${sht30Datas.isScary} を送信しました`);
 }
