@@ -1,7 +1,7 @@
 import {requestI2CAccess} from "node-web-i2c/index.js";
 import GROVEACCELEROMETER from "@chirimen/grove-accelerometer";
 import nodeWebSocketLib from "websocket";
-import {RelayServer} from "./RelayServer.js.js";
+import {RelayServer} from "./RelayServer.js";
 const sleep = msec => new Promise(resolve => setTimeout(resolve, msec));
 
 const accelMotor__From__RasPI = "accelMotor__From__RasPI";
